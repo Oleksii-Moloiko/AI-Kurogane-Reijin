@@ -1,0 +1,32 @@
+# Python (Byte-compiled / optimized / DLL files)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Віртуальне оточення (Virtual Environment)
+.venv/
+venv/
+ENV/
+env/
+
+# Налаштування редакторів та IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Логи та тимчасові файли
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Специфічні файли ОС
+.DS_Store
+Thumbs.db
+
+# Конфігураційні файли (якщо з'являться ключі чи паролі в майбутньому)
+.env
