@@ -1,48 +1,53 @@
+
 import sys
-import shutil
-from llm.client import ask_llm
-from chat.history import add_user_message, add_assistant_message
+from llm.client import ask_llm_stream
+from chat.history import add_message
+from prompts import load_system_prompt
 from config import MODEL_NAME
+from ui.console import (
+    console,
+    print_user,
+    print_system,
+    print_error,
+    stream_assistant_reply,
+)
 
 
 def main():
-    print(f"Чат з моделлю '{MODEL_NAME}' через Ollama.")
-    print("Введіть 'exit' або 'quit', щоб вийти.\n")
+    print_system(f"Чат з моделлю '{MODEL_NAME}' через Ollama.")
+    print_system("Введіть 'exit' або 'quit', щоб вийти.")
 
     chat_history = [
-        {"role": "system", "content": "Ти помічник, який відповідає коротко та лаконічно."}
+        {"role": "system", "content": load_system_prompt()}
     ]
-    
+
     while True:
         try:
-            user_input = input("Ти: ").strip()
+            user_input = console.input("[dim]> [/]").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\nВихід із програми.")
+            print_system("Вихід із програми.")
             break
 
         if not user_input:
             continue
 
         if user_input.lower() in ("exit", "quit"):
-            print("Вихід із програми.")
+            print_system("Вихід із програми.")
             break
 
-        add_user_message(chat_history, user_input)
+        print_user(user_input)
+        add_message(chat_history, "user", user_input)
 
         try:
-            reply = ask_llm(chat_history, model=MODEL_NAME)
+            reply = stream_assistant_reply(
+                ask_llm_stream(chat_history, model=MODEL_NAME),
+                title=MODEL_NAME,
+            )
         except Exception as e:
-            print(f"Помилка при зверненні до Ollama: {e}")
+            print_error(f"Помилка при зверненні до Ollama: {e}")
             continue
 
-        add_assistant_message(chat_history, reply)
-
-        columns = shutil.get_terminal_size().columns
-
-        print("-" * columns)
-        print(f"Модель: {reply}\n")
-        print("-" * columns)
-
+        add_message(chat_history, "assistant", reply)
 
 if __name__ == "__main__":
     sys.exit(main() or 0)

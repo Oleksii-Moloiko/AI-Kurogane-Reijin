@@ -1,22 +1,13 @@
-# Jarvis AI
+# 🤖 AI Kurogane Reijin (Kuro)
 
-Personal AI Assistant built with
-
-- Python
-- Ollama
-- FastAPI
-- PostgreSQL
-- LangGraph
+A local AI assistant built with Python and Ollama.
 
 ## Features
 
 - Chat
 - Memory
 - RAG
+- Tool Calling
 - Agents
-
-## Run
-
-pip install -r requirements.txt
-
-python backend/main.py
+- Voice
+- Terminal UI

@@ -1,5 +1,7 @@
-def add_user_message(history: list, content: str) -> None:
-    history.append({"role": "user", "content": content})
+from typing import Literal
 
-def add_assistant_message(history: list, content: str) -> None:
-    history.append({"role": "assistant", "content": content})
+Role = Literal["system", "user", "assistant"]
+
+
+def add_message(history: list, role: Role, content: str) -> None:
+    history.append({"role": role, "content": content})
