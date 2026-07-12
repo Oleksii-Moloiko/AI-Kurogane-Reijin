@@ -1,0 +1,16 @@
+"""Centralized colors and reusable Rich styles for the terminal UI."""
+
+PRIMARY = "#7C3AED"
+SECONDARY = "#2563EB"
+
+SUCCESS = "#22C55E"
+ERROR = "#EF4444"
+WARNING = "#F59E0B"
+
+TEXT = "#F3F4F6"
+MUTED = "#6B7280"
+BORDER = "#374151"
+
+ASSISTANT_COLOR = PRIMARY
+USER_COLOR = SECONDARY
+SYSTEM_COLOR = MUTED
