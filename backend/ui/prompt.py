@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from ui.console import console
-from ui.theme import MUTED, PRIMARY
+from backend.ui.console import console
+from backend.ui.theme import MUTED, PRIMARY
 
 
 class Command(str, Enum):

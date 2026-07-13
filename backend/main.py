@@ -1,22 +1,27 @@
 """Kuro terminal application entry point."""
-
 import sys
-
-from chat.session import ChatSession
-from commands.handler import handle_command
-from config import MEMORY_ENABLED, MODEL_NAME, WORKSPACE_PATH
-from llm.client import ask_llm_stream
-from ui.console import console
-from ui.layout import print_banner, print_footer, print_header
-from ui.panels import (
+from backend.chat.session import ChatSession
+from backend.commands.handler import handle_command
+from backend.config import settings
+from backend.llm.client import ask_llm_stream
+from backend.ui.console import console
+from backend.ui.layout import (
+    print_banner,
+    print_footer,
+    print_header,
+)
+from backend.ui.panels import (
     print_error,
     print_response_statistics,
     print_system,
     print_user,
 )
-from ui.prompt import print_prompt_hint, read_prompt
-from ui.stream import stream_assistant_reply
+from backend.ui.prompt import print_prompt_hint, read_prompt
+from backend.ui.stream import stream_assistant_reply
+from backend.utils.logger import get_logger
 
+
+logger = get_logger("backend.main")
 
 def render_start_screen(model_name: str) -> None:
     """Render the initial terminal interface."""
@@ -27,8 +32,8 @@ def render_start_screen(model_name: str) -> None:
 
     print_header(
         model_name=model_name,
-        memory_enabled=MEMORY_ENABLED,
-        workspace=WORKSPACE_PATH,
+        memory_enabled=settings.memory_enabled,
+        workspace=settings.workspace_path,
     )
 
     print_footer()
@@ -38,8 +43,14 @@ def render_start_screen(model_name: str) -> None:
 def main() -> int:
     """Run the Kuro terminal chat loop."""
 
+    logger.info(
+        "Kuro started: version=%s model=%s",
+        settings.app_version,
+        settings.ollama_model,
+    )
+
     session = ChatSession(
-        model=MODEL_NAME,
+        model=settings.ollama_model,
     )
 
     render_start_screen(session.model)
@@ -48,6 +59,7 @@ def main() -> int:
         try:
             prompt_result = read_prompt()
         except (EOFError, KeyboardInterrupt):
+            logger.info("Kuro stopped by user")
             print_system("Вихід із програми.")
             return 0
 
@@ -57,6 +69,10 @@ def main() -> int:
             continue
 
         if user_input.casefold() in {"exit", "quit"}:
+            logger.info(
+                "Kuro stopped using command: %s",
+                user_input.casefold(),
+            )
             print_system("Вихід із програми.")
             return 0
 
@@ -86,6 +102,10 @@ def main() -> int:
             )
 
         except Exception as error:
+            logger.exception(
+                "Ollama request failed: model=%s",
+                session.model,
+            )
             print_error(
                 f"Помилка при зверненні до Ollama: {error}"
             )
@@ -98,6 +118,18 @@ def main() -> int:
 
         print_response_statistics(
             response_stream.metrics
+        )
+
+        logger.info(
+            (
+                "Ollama response completed: "
+                "model=%s tokens=%s total_seconds=%.2f "
+                "tokens_per_second=%.1f"
+            ),
+            response_stream.metrics.model,
+            response_stream.metrics.eval_count,
+            response_stream.metrics.total_seconds,
+            response_stream.metrics.tokens_per_second,
         )
 
     return 0

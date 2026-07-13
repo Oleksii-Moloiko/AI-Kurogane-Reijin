@@ -1,18 +1,26 @@
 """Terminal command handlers."""
 
-from chat.session import ChatSession
-from config import MEMORY_ENABLED, WORKSPACE_PATH
-from llm.client import get_available_models
-from ui.console import console
-from ui.layout import print_banner, print_footer, print_header
-from ui.panels import (
+from backend.chat.session import ChatSession
+from backend.config import settings
+from backend.llm.client import get_available_models
+from backend.ui.console import console
+from backend.ui.layout import (
+    print_banner,
+    print_footer,
+    print_header,
+)
+from backend.ui.panels import (
     print_error,
     print_help,
     print_history,
     print_model_list,
     print_system,
 )
-from ui.prompt import Command, read_model_choice
+from backend.ui.prompt import Command, read_model_choice
+from backend.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 def select_model(current_model: str) -> str:
@@ -21,14 +29,32 @@ def select_model(current_model: str) -> str:
     try:
         models = get_available_models()
     except Exception as error:
+        
+        logger.exception(
+            "Failed to retrieve Ollama models"
+        )
+
         print_error(
             f"Не вдалося отримати список моделей Ollama: {error}"
         )
         return current_model
 
     if not models:
+        logger.warning("No local Ollama models found")
+
         print_error(
             "Локальні моделі Ollama не знайдено."
+        )
+        return current_model
+    
+    if selected_model is None:
+        logger.warning(
+            "Invalid model selection: choice=%s",
+            choice,
+        )
+
+        print_error(
+            f"Не вдалося знайти модель за значенням: {choice}"
         )
         return current_model
 
@@ -69,6 +95,12 @@ def select_model(current_model: str) -> str:
         f"{current_model} → {selected_model}"
     )
 
+    logger.info(
+        "Active model changed: old_model=%s new_model=%s",
+        current_model,
+        selected_model,
+    )
+
     return selected_model
 
 
@@ -98,29 +130,15 @@ def resolve_model_choice(
     )
 
 
-def clear_chat(session: ChatSession) -> None:
-    """Clear the active conversation."""
-
-    session.reset()
-
-    console.clear()
-
-    print_banner()
-
-    print_header(
-        model_name=session.model,
-        memory_enabled=MEMORY_ENABLED,
-        workspace=WORKSPACE_PATH,
-    )
-
-    print_footer()
-    print_system("Історію поточного чату очищено.")
-
 def handle_command(
     command: Command,
     session: ChatSession,
 ) -> None:
     """Execute a terminal command."""
+    logger.info(
+        "Command received: command=%s",
+        command.value,
+    )
 
     if command is Command.CLEAR:
         handle_clear(session)
@@ -147,14 +165,16 @@ def handle_clear(session: ChatSession) -> None:
 
     session.reset()
 
+    logger.info("Chat history cleared")
+
     console.clear()
 
     print_banner()
 
     print_header(
         model_name=session.model,
-        memory_enabled=MEMORY_ENABLED,
-        workspace=WORKSPACE_PATH,
+        memory_enabled=settings.memory_enabled,
+        workspace=settings.workspace_path,
     )
 
     print_footer()
@@ -164,12 +184,17 @@ def handle_clear(session: ChatSession) -> None:
 def handle_history(session: ChatSession) -> None:
     """Display the current conversation history."""
 
+    logger.info(
+        "Chat history displayed: message_count=%s",
+        len(session.visible_messages),
+    )
+
     print_history(session.messages)
 
 
 def handle_help() -> None:
     """Display available commands."""
-
+    logger.info("Help displayed")
     print_help()
 
 

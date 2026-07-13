@@ -5,13 +5,16 @@ from rich.align import Align
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from config import APP_FULL_NAME, APP_NAME, APP_VERSION
-from ui.console import console
-from ui.theme import BORDER, MUTED, PRIMARY, SECONDARY, TEXT
+from backend.config import settings
+from backend.ui.console import console
+from backend.ui.theme import (
+    BORDER,
+    MUTED,
+    PRIMARY,
+    SECONDARY,
+    TEXT,
+)
 
-APP_NAME = "Kuro"
-APP_FULL_NAME = "AI Kurogane Reijin"
-APP_VERSION = "0.1.0"
 
 FULL_BANNER = r"""
 ██╗  ██╗██╗   ██╗██████╗  ██████╗
@@ -58,7 +61,7 @@ def print_banner() -> None:
     console.print(
         Align.center(
             Text(
-                APP_FULL_NAME,
+                settings.app_full_name,
                 style=f"bold {TEXT}",
                 no_wrap=True,
                 overflow="ellipsis",
@@ -79,7 +82,7 @@ def print_banner() -> None:
     console.print(
         Align.center(
             Text(
-                f"Version {APP_VERSION}",
+                f"Version {settings.app_version}",
                 style=MUTED,
                 no_wrap=True,
             )
@@ -124,7 +127,7 @@ def print_header(
         overflow="ellipsis",
     )
 
-    table.add_row("🤖", f"[bold {PRIMARY}]{APP_NAME}[/]")
+    table.add_row("🤖", f"[bold {PRIMARY}]{settings.app_name}[/]")
     table.add_row("Local LLM", f"[{SECONDARY}]{model_name}[/]")
     table.add_row("Memory", memory_status)
     table.add_row("Workspace", str(workspace_path))

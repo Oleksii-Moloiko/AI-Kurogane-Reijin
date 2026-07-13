@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 
-from prompts import load_system_prompt
+from backend.prompts import load_system_prompt
 
 
 Message = dict[str, str]

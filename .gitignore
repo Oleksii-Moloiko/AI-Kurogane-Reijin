@@ -26,3 +26,14 @@ __pycache__/
 # Build
 dist/
 build/
+
+# Runtime data
+data/logs/*.log
+data/logs/*.log.*
+data/history/*
+data/memory/*
+
+# Preserve directories
+!data/history/.gitkeep
+!data/memory/.gitkeep
+!data/logs/.gitkeep

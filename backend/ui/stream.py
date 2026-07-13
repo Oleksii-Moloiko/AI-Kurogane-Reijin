@@ -8,8 +8,8 @@ from rich.panel import Panel
 from rich.spinner import Spinner
 from rich.text import Text
 
-from ui.console import console
-from ui.theme import ASSISTANT_COLOR, MUTED
+from backend.ui.console import console
+from backend.ui.theme import ASSISTANT_COLOR, MUTED
 
 
 STREAM_CURSOR = "█"

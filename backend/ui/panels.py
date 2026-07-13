@@ -4,9 +4,9 @@ from rich.text import Text
 from rich.table import Table
 from rich.markdown import Markdown
 
-from llm.client import StreamMetrics
-from ui.theme import BORDER, ERROR, MUTED, PRIMARY, SUCCESS, TEXT, USER_COLOR
-from ui.console import console
+from backend.llm.client import StreamMetrics
+from backend.ui.theme import BORDER, ERROR, MUTED, PRIMARY, SUCCESS, TEXT, USER_COLOR
+from backend.ui.console import console
 
 
 
