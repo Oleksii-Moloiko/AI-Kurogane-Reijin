@@ -15,23 +15,24 @@ load_dotenv(ENV_FILE)
 
 def get_bool_env(
     name: str,
-    default: bool = False,
+    default: bool,
 ) -> bool:
-    """Read a boolean value from an environment variable."""
+    raw_value = os.getenv(name)
 
-    value = os.getenv(name)
-
-    if value is None:
+    if raw_value is None:
         return default
 
-    normalized_value = value.strip().lower()
+    normalized = raw_value.strip().casefold()
 
-    return normalized_value in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+
+    raise ValueError(
+        f"Environment variable {name} must be a boolean."
+    )
 
 
 def get_int_env(
@@ -99,9 +100,14 @@ class Settings:
     app_full_name: str
     app_version: str
 
+    llm_provider: str
+    llm_model: str
+    llm_temperature: float
     ollama_model: str
     ollama_host: str
     ollama_temperature: float
+    openai_base_url: str
+    openai_api_key: str
 
     memory_enabled: bool
     max_history: int
@@ -113,6 +119,18 @@ class Settings:
     logs_dir: Path
     log_file: Path
     log_level: str
+    database_path: Path
+    documents_dir: Path
+    max_document_size_mb: int
+    chunk_size: int
+    chunk_overlap: int
+    embedding_provider: str
+    embedding_model: str
+    embedding_batch_size: int
+    rag_top_k: int
+    rag_min_similarity: float
+    rag_enabled: bool
+    rag_max_context_chars: int
 
 
 DATA_DIR = get_path_env(
@@ -136,8 +154,11 @@ settings = Settings(
     ),
     app_version=os.getenv(
         "APP_VERSION",
-        "0.2.0",
+        "0.4.0",
     ),
+    llm_provider=os.getenv("LLM_PROVIDER", "ollama").strip().lower(),
+    llm_model=os.getenv("LLM_MODEL", os.getenv("OLLAMA_MODEL", "gemma3")),
+    llm_temperature=get_float_env("LLM_TEMPERATURE", get_float_env("OLLAMA_TEMPERATURE", 0.7)),
     ollama_model=os.getenv(
         "OLLAMA_MODEL",
         "gemma3",
@@ -150,6 +171,8 @@ settings = Settings(
         "OLLAMA_TEMPERATURE",
         0.7,
     ),
+    openai_base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").strip(),
+    openai_api_key=os.getenv("OPENAI_API_KEY", "").strip(),
     memory_enabled=get_bool_env(
         "MEMORY_ENABLED",
         default=False,
@@ -180,4 +203,52 @@ settings = Settings(
         "LOG_LEVEL",
         "INFO",
     ).strip().upper(),
+    database_path=get_path_env("DATABASE_PATH", DATA_DIR / "kuro.db"),
+    documents_dir=get_path_env(
+        "DOCUMENTS_DIR",
+        DATA_DIR / "documents",
+    ),
+    max_document_size_mb=get_int_env(
+        "MAX_DOCUMENT_SIZE_MB",
+        20,
+    ),
+    chunk_size=get_int_env(
+        "CHUNK_SIZE",
+        1000,
+    ),
+    chunk_overlap=get_int_env(
+        "CHUNK_OVERLAP",
+        150,
+    ),
+    embedding_provider=os.getenv(
+        "EMBEDDING_PROVIDER",
+        "ollama",
+    ).strip().casefold(),
+
+    embedding_model=os.getenv(
+        "EMBEDDING_MODEL",
+        "nomic-embed-text",
+    ).strip(),
+
+    embedding_batch_size=get_int_env(
+        "EMBEDDING_BATCH_SIZE",
+        16,
+    ),
+    rag_top_k=get_int_env(
+        "RAG_TOP_K",
+        5,
+    ),
+    rag_min_similarity=get_float_env(
+        "RAG_MIN_SIMILARITY",
+        0.35,
+    ),
+    rag_enabled=get_bool_env(
+        "RAG_ENABLED",
+        True,
+    ),
+
+    rag_max_context_chars=get_int_env(
+        "RAG_MAX_CONTEXT_CHARS",
+        6000,
+    ),
 )

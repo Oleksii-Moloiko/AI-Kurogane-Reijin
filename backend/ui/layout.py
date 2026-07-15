@@ -105,6 +105,9 @@ def print_header(
     model_name: str,
     memory_enabled: bool = True,
     workspace: str | Path | None = None,
+    provider_name: str = "ollama",
+    chat_id: str | None = None,
+    chat_title: str | None = None,
 ) -> None:
     """Display responsive information about the current session."""
 
@@ -128,7 +131,10 @@ def print_header(
     )
 
     table.add_row("🤖", f"[bold {PRIMARY}]{settings.app_name}[/]")
-    table.add_row("Local LLM", f"[{SECONDARY}]{model_name}[/]")
+    table.add_row("Provider", f"[{SECONDARY}]{provider_name}[/]")
+    table.add_row("Model", f"[{SECONDARY}]{model_name}[/]")
+    if chat_id:
+        table.add_row("Chat", f"{chat_title or 'Новий чат'} ({chat_id})")
     table.add_row("Memory", memory_status)
     table.add_row("Workspace", str(workspace_path))
 
@@ -164,6 +170,9 @@ def print_footer() -> None:
     footer.add_row("/history", "Історія")
     footer.add_row("/help", "Допомога")
     footer.add_row("/model", "Змінити модель")
+    footer.add_row("/new", "Новий чат")
+    footer.add_row("/sessions", "Список чатів")
+    footer.add_row("/resume", "Відновити чат")
 
     console.print()
     console.rule(style=BORDER)

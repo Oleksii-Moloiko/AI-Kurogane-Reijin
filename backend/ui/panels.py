@@ -4,7 +4,8 @@ from rich.text import Text
 from rich.table import Table
 from rich.markdown import Markdown
 
-from backend.llm.client import StreamMetrics
+from backend.llm.types import StreamMetrics
+from backend.storage import ChatRecord
 from backend.ui.theme import BORDER, ERROR, MUTED, PRIMARY, SUCCESS, TEXT, USER_COLOR
 from backend.ui.console import console
 
@@ -100,11 +101,56 @@ def print_help() -> None:
         style=MUTED,
     )
 
-    table.add_row("/clear", "Очистити історію поточного чату")
-    table.add_row("/history", "Показати історію повідомлень")
-    table.add_row("/help", "Показати доступні команди")
-    table.add_row("/model", "Показати або змінити модель")
-    table.add_row("Ctrl+C", "Завершити роботу")
+    table.add_row(
+        "/clear",
+        "Очистити історію поточного чату",
+    )
+    table.add_row(
+        "/history",
+        "Показати історію повідомлень",
+    )
+    table.add_row(
+        "/model",
+        "Показати або змінити модель",
+    )
+    table.add_row(
+        "/new",
+        "Створити новий чат",
+    )
+    table.add_row(
+        "/sessions",
+        "Показати збережені чати",
+    )
+    table.add_row(
+        "/resume",
+        "Відновити збережений чат",
+    )
+
+    table.add_row("", "")
+
+    table.add_row(
+        "/index <path>",
+        "Проіндексувати PDF або DOCX",
+    )
+    table.add_row(
+        "/documents [limit]",
+        "Показати проіндексовані документи",
+    )
+    table.add_row(
+        "/remove <id>",
+        "Видалити документ, chunks та embeddings",
+    )
+
+    table.add_row("", "")
+
+    table.add_row(
+        "/help",
+        "Показати доступні команди",
+    )
+    table.add_row(
+        "Ctrl+C",
+        "Завершити роботу",
+    )
 
     console.print(
         Panel(
@@ -199,3 +245,36 @@ def print_model_list(
         )
     )
 
+
+
+def print_chat_list(chats: list[ChatRecord]) -> None:
+    """Display saved chat sessions."""
+    if not chats:
+        print_system("Збережених чатів ще немає.")
+        return
+
+    table = Table(show_header=True, header_style=f"bold {TEXT}", expand=True)
+    table.add_column("#", width=4)
+    table.add_column("ID", no_wrap=True)
+    table.add_column("Назва", overflow="ellipsis")
+    table.add_column("Provider / Model", overflow="ellipsis")
+    table.add_column("Повідомлень", justify="right")
+
+    for index, chat in enumerate(chats, start=1):
+        table.add_row(
+            str(index),
+            chat.id,
+            chat.title,
+            f"{chat.provider} / {chat.model}",
+            str(chat.message_count),
+        )
+
+    console.print(
+        Panel(
+            table,
+            title=f"[bold {PRIMARY}]Збережені чати[/]",
+            title_align="left",
+            border_style=PRIMARY,
+            padding=(1, 1),
+        )
+    )
