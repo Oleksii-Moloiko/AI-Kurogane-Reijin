@@ -19,55 +19,49 @@ def stream_assistant_reply(
     chunk_generator: Iterable[str],
     title: str = "Kuro",
 ) -> str:
-    """Render assistant output incrementally and return the complete reply."""
+    """Collect the full assistant reply while showing a spinner, then
+    render the complete response as a single Markdown panel once
+    generation has finished."""
 
     accumulated = ""
     iterator: Iterator[str] = iter(chunk_generator)
 
-    def render_streaming() -> Panel:
-        """Render safe plain text while the response is still incomplete."""
+    def render_thinking() -> Panel:
+        """Waiting indicator shown while the reply is still generating."""
 
-        if not accumulated:
-            body = Spinner(
+        return Panel(
+            Spinner(
                 "dots",
                 text=Text("Думаю...", style=MUTED),
-            )
-        else:
-            body = Text(
-                accumulated + STREAM_CURSOR,
-                overflow="fold",
-            )
-
-        return Panel(
-            body,
+            ),
             title=f"[bold {ASSISTANT_COLOR}]🤖 {title}[/]",
             title_align="left",
             border_style=ASSISTANT_COLOR,
             padding=(0, 1),
         )
 
-    def render_complete() -> Panel:
-        """Render final response as Markdown."""
-
-        body = Markdown(accumulated)
-
-        return Panel(
-            body,
-            title=f"[bold {ASSISTANT_COLOR}]🤖 {title}[/]",
-            title_align="left",
-            border_style=ASSISTANT_COLOR,
-            padding=(0, 1),
-        )
-
+    # Спінер показуємо, поки відповідь генерується, але сам текст
+    # не малюємо частинами — лише крутиться індикатор очікування.
     with Live(
-        render_streaming(),
+        render_thinking(),
         console=console,
-        refresh_per_second=20,
+        refresh_per_second=10,
+        transient=True,
     ) as live:
         for chunk in iterator:
             accumulated += chunk
-            live.update(render_streaming())
+            live.refresh()
 
-        live.update(render_complete())
+    # Після завершення сесії генерації виводимо готову відповідь
+    # одним блоком у вигляді Markdown-панелі.
+    console.print(
+        Panel(
+            Markdown(accumulated),
+            title=f"[bold {ASSISTANT_COLOR}]🤖 {title}[/]",
+            title_align="left",
+            border_style=ASSISTANT_COLOR,
+            padding=(0, 1),
+        )
+    )
 
     return accumulated

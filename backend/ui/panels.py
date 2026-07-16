@@ -4,7 +4,6 @@ from rich.text import Text
 from rich.table import Table
 from rich.markdown import Markdown
 
-from backend.llm.types import StreamMetrics
 from backend.storage import ChatRecord
 from backend.ui.theme import BORDER, ERROR, MUTED, PRIMARY, SUCCESS, TEXT, USER_COLOR
 from backend.ui.console import console
@@ -38,52 +37,6 @@ def print_error(message: str) -> None:
 def print_system(message: str) -> None:
     console.print(f"[{MUTED}]· {message}[/]")
 
-
-def print_response_statistics(metrics: StreamMetrics) -> None:
-    """Display response generation statistics."""
-
-    table = Table.grid(
-        padding=(0, 1),
-    )
-
-    table.add_column(
-        style=f"bold {TEXT}",
-        no_wrap=True,
-    )
-
-    table.add_column(
-        style=MUTED,
-    )
-
-    table.add_row(
-        f"[{SUCCESS}]✔[/] Response complete",
-        "",
-    )
-
-    table.add_row(
-        "🧠 Model",
-        metrics.model,
-    )
-
-    table.add_row(
-        "⚡ Speed",
-        f"{metrics.tokens_per_second:.1f} tok/sec",
-    )
-
-    table.add_row(
-        "⏱ Time",
-        f"{metrics.total_seconds:.2f} sec",
-    )
-
-    table.add_row(
-        "📄 Tokens",
-        str(metrics.eval_count),
-    )
-
-    console.print()
-    console.rule(style=BORDER)
-    console.print(table)
-    console.print()
 
 def print_help() -> None:
     """Display available terminal commands."""
