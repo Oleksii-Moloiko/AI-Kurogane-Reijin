@@ -29,15 +29,12 @@ from backend.ui.layout import (
 )
 from backend.ui.panels import (
     print_error,
-    print_response_statistics,
     print_system,
-    print_user,
 )
 from backend.ui.prompt import (
     print_prompt_hint,
     read_prompt,
 )
-from backend.ui.sources import print_rag_sources
 from backend.ui.stream import stream_assistant_reply
 from backend.utils.logger import get_logger
 
@@ -175,7 +172,9 @@ def main() -> int:
 
             continue
 
-        print_user(user_input)
+        # console.input() у read_prompt() вже показує введений текст
+        # у терміналі, тож окрему панель "Ти" тут більше не малюємо —
+        # це й було причиною дублювання вводу.
 
         # Зберігаємо лише справжнє повідомлення користувача.
         session.add_message(
@@ -188,6 +187,7 @@ def main() -> int:
         rag_context = rag_runtime.retrieve(
             user_input
         )
+        session.last_rag_context = rag_context
 
         llm_messages = inject_rag_context(
             session.context_messages,
@@ -234,14 +234,6 @@ def main() -> int:
         session.add_message(
             role="assistant",
             content=reply,
-        )
-
-        print_response_statistics(
-            response_stream.metrics
-        )
-
-        print_rag_sources(
-            rag_context
         )
 
     return 0
