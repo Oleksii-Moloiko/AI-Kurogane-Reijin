@@ -19,6 +19,7 @@ class Command(str, Enum):
     INDEX = "/index"
     DOCUMENTS = "/documents"
     REMOVE = "/remove"
+    SOURCES = "/sources"
 
 
 @dataclass(frozen=True)

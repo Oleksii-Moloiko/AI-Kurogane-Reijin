@@ -18,6 +18,7 @@ from backend.ui.panels import (
     print_system,
 )
 from backend.ui.prompt import Command, read_chat_choice, read_model_choice
+from backend.ui.sources import print_rag_sources
 from backend.ui.documents import (
     print_document_removed,
     print_documents,
@@ -135,11 +136,31 @@ def handle_command(
             arguments=arguments,
             repository=repository,
         )
+
+    elif command is Command.SOURCES:
+        handle_sources(session=session)
     
     else:
         print_error(f"Команда {command.value} не підтримується.")
     
     return session
+
+def handle_sources(
+    *,
+    session: ChatSession,
+) -> None:
+    """Show RAG sources used for the latest assistant reply."""
+
+    rag_context = session.last_rag_context
+
+    if rag_context is None or rag_context.is_empty:
+        print_system(
+            "Джерела для останньої відповіді відсутні."
+        )
+        return
+
+    print_rag_sources(rag_context)
+
 
 def handle_index(
     *,

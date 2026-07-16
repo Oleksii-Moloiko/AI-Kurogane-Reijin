@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 
 from backend.prompts import load_system_prompt
+from backend.rag.models import RAGContext
 from backend.storage import ChatRepository
 
 Message = dict[str, str]
@@ -17,6 +18,7 @@ class ChatSession:
     chat_id: str | None = None
     title: str = "Новий чат"
     messages: list[Message] = field(default_factory=list)
+    last_rag_context: RAGContext | None = None
 
     def __post_init__(self) -> None:
         if self.chat_id:
@@ -30,6 +32,7 @@ class ChatSession:
         if persist and self.chat_id:
             self.repository.clear_messages(self.chat_id)
         self.messages = [{"role": "system", "content": load_system_prompt()}]
+        self.last_rag_context = None
         if reset_title:
             self.rename("Новий чат")
         if persist and self.chat_id:

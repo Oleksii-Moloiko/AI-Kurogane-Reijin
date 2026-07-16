@@ -21,6 +21,7 @@ def test_parse_new_commands() -> None:
         "/index": Command.INDEX,
         "/documents": Command.DOCUMENTS,
         "/remove": Command.REMOVE,
+        "/sources": Command.SOURCES,
     }
 
     for value, expected_command in test_cases.items():

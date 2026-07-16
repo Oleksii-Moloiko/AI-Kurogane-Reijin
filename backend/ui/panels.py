@@ -93,6 +93,10 @@ def print_help() -> None:
         "/remove <id>",
         "Видалити документ, chunks та embeddings",
     )
+    table.add_row(
+        "/sources",
+        "Показати джерела останньої відповіді",
+    )
 
     table.add_row("", "")
 

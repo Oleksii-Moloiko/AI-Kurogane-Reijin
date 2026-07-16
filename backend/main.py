@@ -35,7 +35,6 @@ from backend.ui.prompt import (
     print_prompt_hint,
     read_prompt,
 )
-from backend.ui.sources import print_rag_sources
 from backend.ui.stream import stream_assistant_reply
 from backend.utils.logger import get_logger
 
@@ -188,6 +187,7 @@ def main() -> int:
         rag_context = rag_runtime.retrieve(
             user_input
         )
+        session.last_rag_context = rag_context
 
         llm_messages = inject_rag_context(
             session.context_messages,
@@ -234,10 +234,6 @@ def main() -> int:
         session.add_message(
             role="assistant",
             content=reply,
-        )
-
-        print_rag_sources(
-            rag_context
         )
 
     return 0
